@@ -8,6 +8,8 @@ venv/
 
 # Data
 data/
+raw/*
+!raw/.gitkeep
 
 # IDE settings
 .vscode/

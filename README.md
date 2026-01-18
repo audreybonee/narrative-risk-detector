@@ -1,219 +1,297 @@
-# 🚨 Narrative Risk Early-Warning System
+# 📰 Emergent Narrative Detection System
 
-**Detect coordinated messaging before it goes viral.**
+An ML pipeline for detecting, tracking, and classifying how narratives emerge and propagate across the news media ecosystem. Designed for researchers in computational social science to differentiate between organic viral trends and coordinated influence operations.
 
-A production-ready ML pipeline that identifies emerging coordinated narratives across social media using semantic clustering, vector databases, and LLM-powered risk assessment.
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+![Status](https://img.shields.io/badge/Status-Active%20Development-orange.svg)
 
-![Python](https://img.shields.io/badge/Python-3.11+-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green)
-![Qdrant](https://img.shields.io/badge/Qdrant-Vector_DB-red)
+## Overview
 
----
+The Emergent Narrative Detection System shifts the unit of analysis from individual user posts to institutional behavior. By modeling news outlets as agents in a network, it identifies distinct patterns of information propagation:
 
-## Problem Statement
+- **Wire cascades**: How wire service stories propagate through the media ecosystem
+- **PR amplification**: Corporate/institutional messaging gaining media traction
+- **Frame convergence**: Multiple outlets organically converging on similar framing
+- **Cross-spectrum spread**: Stories crossing political boundaries
+- **Synchronized messaging**: Potential coordinated framing patterns
 
-> *"Alert me when a coordinated narrative is accelerating."*
+Rather than detecting "misinformation," this system focuses on understanding the *dynamics* of narrative emergence—how stories gain traction, which outlets pick them up, and how framing evolves over time.
 
-Trust & Safety teams, brand managers, and security analysts need to detect coordinated messaging campaigns **before** they reach mainstream visibility. This system provides:
+## Features
 
-- **Early Detection**: Identify narrative clusters hours before peak spread
-- **Coordination Signals**: Distinguish organic discussion from coordinated campaigns
-- **Risk Assessment**: LLM-powered analysis of manipulation tactics
-- **Actionable Alerts**: Dashboard with evidence snippets for human review
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        DATA SOURCES                             │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐         │
-│  │  Kaggle  │  │  Reddit  │  │   News   │  │ Twitter  │         │
-│  │ (Batch)  │  │  (Live)  │  │   APIs   │  │  (Future)│         │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘         │
-│       └─────────────┼─────────────┼─────────────┘               │
-│                     ▼                                           │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │              INGESTION LAYER (Pydantic Models)           │   │
-│  │         Normalize → Validate → Time Window               │   │
-│  └────────────────────────────┬─────────────────────────────┘   │
-└───────────────────────────────┼─────────────────────────────────┘
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      PROCESSING PIPELINE                        │
-│  ┌────────────┐    ┌────────────┐    ┌────────────┐             │
-│  │ Embeddings │ →  │  Qdrant    │ →  │  HDBSCAN   │             │
-│  │ (MiniLM)   │    │ (Vectors)  │    │ Clustering │             │
-│  └────────────┘    └────────────┘    └─────┬──────┘             │
-│                                            ▼                    │
-│  ┌────────────────────────────────────────────────────────┐     │
-│  │              COORDINATION DETECTION                    │     │
-│  │  • Semantic coherence scoring                          │     │
-│  │  • Author diversity analysis                           │     │
-│  │  • Temporal burst detection                            │     │
-│  └────────────────────────────┬───────────────────────────┘     │
-│                               ▼                                 │
-│  ┌────────────────────────────────────────────────────────┐     │
-│  │              LLM RISK ASSESSMENT                       │     │
-│  │  • "Us vs Them" framing detection                      │     │
-│  │  • Emotional manipulation scoring                      │     │
-│  │  • Claim-template extraction                           │     │
-│  └────────────────────────────┬───────────────────────────┘     │
-└───────────────────────────────┼─────────────────────────────────┘
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                         OUTPUT LAYER                            │
-│  ┌────────────┐    ┌────────────┐    ┌────────────┐             │
-│  │  FastAPI   │    │ Streamlit  │    │  Postgres  │             │
-│  │  Alerts    │    │ Dashboard  │    │   (Logs)   │             │
-│  └────────────┘    └────────────┘    └────────────┘             │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-## Key Metrics
-
-| Metric | Description | Target |
-|--------|-------------|--------|
-| **Precision@k** | Alert accuracy (top k alerts) | > 80% |
-| **Lead Time** | Hours before peak spread | > 4 hours |
-| **Cluster Purity** | Semantic coherence | > 0.7 |
+-  **Semantic Clustering**: Groups articles by narrative similarity using sentence embeddings and HDBSCAN
+-  **Narrative Lifecycle Tracking**: Monitors stories from nascent emergence through establishment
+-  **Real-time Signals**: Detects noteworthy patterns like velocity spikes and cross-spectrum spread
+-  **Interactive Dashboard**: Streamlit UI for exploring narratives and reviewing signals
+-  **REST API**: FastAPI endpoints for integration with other tools
+-  **Configurable Thresholds**: Tune detection sensitivity via environment variables
 
 ## Quick Start
 
-### 1. Clone and Setup
+### Installation
 
 ```bash
-git clone https://github.com/yourusername/narrative-risk-detector.git
-cd narrative-risk-detector
+# Clone the repository
+git clone https://github.com/yourusername/narrative-detection.git
+cd narrative-detection
 
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Get Data
-
-Download from Kaggle (choose one to start):
-- [WallStreetBets Posts](https://www.kaggle.com/datasets/gpreda/reddit-wallstreetsbets-posts) - GME squeeze data
-- [Reddit COVID Dataset](https://www.kaggle.com/datasets/pavellexyr/the-reddit-covid-dataset) - Misinformation waves
-
-Place CSV in `data/raw/`
-
-### 3. Configure
+### Run the Dashboard
 
 ```bash
-cp .env.example .env
-# Edit .env with your API keys
+streamlit run dashboard/app.py
 ```
 
-### 4. Start Qdrant (Vector Database)
+Then in your browser:
+1. Click **"Load Data"** in the sidebar
+2. Click **"Run Full Pipeline"** to process articles
+3. Explore the detected narratives and signals
+
+### Run via CLI
 
 ```bash
-docker run -p 6333:6333 qdrant/qdrant
+python scripts/batch_pipeline.py --input data/raw/synthetic_news.csv --verbose
 ```
 
-### 5. Run Exploration Notebook
-
-```bash
-jupyter notebook notebooks/01_data_exploration.ipynb
-```
+Results are saved to `data/processed/`.
 
 ## Project Structure
 
 ```
-narrative-risk-detector/
-├── data/
-│   ├── raw/              # Downloaded Kaggle datasets
-│   └── processed/        # Windowed, cleaned data
-├── notebooks/
-│   ├── 01_data_exploration.ipynb
-│   └── 02_clustering_experiments.ipynb
-├── src/
-│   ├── models.py         # Pydantic data models
-│   ├── config.py         # Centralized configuration
-│   ├── ingestion/        # Data loading (Kaggle, Reddit API)
-│   ├── processing/       # Embeddings, clustering, LLM scoring
-│   ├── database/         # Qdrant vector store
-│   └── api/              # FastAPI endpoints
-├── dashboard/
-│   └── app.py            # Streamlit dashboard
+narrative-detection/
+├── README.md
+├── CLAUDE.md              # Development guidance for AI assistants
 ├── requirements.txt
-└── README.md
+├── .env.example           # Configuration template
+│
+├── data/
+│   ├── raw/               # Input datasets
+│   ├── processed/         # Pipeline outputs (JSON)
+│   └── chroma/            # Vector store persistence
+│
+├── src/
+│   ├── models/            # Pydantic data models
+│   │   ├── enums.py       # Taxonomy enums (OutletType, PatternType, etc.)
+│   │   ├── article.py     # Article model
+│   │   ├── cluster.py     # NarrativeCluster model
+│   │   └── signal.py      # NarrativeSignal model
+│   │
+│   ├── ingestion/         # Data loading
+│   │   ├── loader.py      # CSV ingestion
+│   │   └── time_window.py # Temporal iteration utilities
+│   │
+│   ├── processing/        # ML pipeline
+│   │   ├── embeddings.py  # Sentence-transformer embeddings
+│   │   ├── clustering.py  # HDBSCAN narrative clustering
+│   │   └── narrative_detector.py  # Signal detection
+│   │
+│   ├── api/               # REST API
+│   │   └── main.py        # FastAPI application
+│   │
+│   ├── labeling/          # Weak supervision (planned)
+│   ├── training/          # Classifier training (planned)
+│   ├── monitoring/        # Drift detection (planned)
+│   └── db/                # Database persistence (planned)
+│
+├── dashboard/
+│   └── app.py             # Streamlit dashboard
+│
+├── scripts/
+│   └── batch_pipeline.py  # CLI batch processing
+│
+└── tests/
+    └── test_core.py       # Unit tests
 ```
 
-## Technical Highlights
+## Data Format
 
-### Extensible Data Models
-```python
-# Same Document model works for any source
-doc = Document(
-    id="abc123",
-    text="GME to the moon! 🚀",
-    timestamp=datetime.now(),
-    source=DataSource.REDDIT,
-    subreddit="wallstreetbets"
-)
+The system expects a CSV with the following columns:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | string | Unique article identifier |
+| `outlet` | string | Publication name (e.g., "Reuters", "CNN") |
+| `outlet_type` | enum | `wire_service`, `major_national`, `local_regional`, `independent` |
+| `outlet_bias` | enum | `left`, `center-left`, `center`, `center-right`, `right` |
+| `title` | string | Article headline |
+| `body` | string | Article content |
+| `author` | string | Byline |
+| `published_at` | datetime | Publication timestamp (ISO format) |
+| `section` | string | News section (Politics, Business, etc.) |
+| `wire_source` | string | Origin: `Reuters`, `AP`, `Original`, `Press Release` |
+
+**Optional ground-truth columns** (for labeled datasets):
+- `pattern_type`: `wire_echo`, `pr_amplification`, `narrative_convergence`, `synchronized_messaging`, `independent_reporting`
+- `pattern_topic`: Story topic identifier
+- `keywords`: List of keywords (as string)
+- `pr_source`: PR origin if applicable
+- `convergent_frame`: Convergent framing text
+- `coordinated_frame`: Coordinated framing text
+
+## Key Concepts
+
+### Narrative Lifecycle Stages
+
+Stories progress through a lifecycle as they spread:
+
+```
+NASCENT → EMERGING → SPREADING → ESTABLISHED → DECLINING → DORMANT
 ```
 
-### Time-Window Simulation
-```python
-# Replay historical data as streaming
-for window in loader.iterate_windows(hours=1):
-    clusters = detect_coordination(window.documents)
-    if clusters:
-        alert_team(clusters)
+| Stage | Criteria |
+|-------|----------|
+| **Nascent** | 1-2 sources, < 6 hours old |
+| **Emerging** | 3-5 sources, cross-outlet spread beginning |
+| **Spreading** | 6+ sources, clear velocity increase |
+| **Established** | Wide coverage, consistent framing |
+| **Declining** | Velocity decreasing |
+| **Dormant** | Coverage stopped |
+
+### Core Metrics
+
+| Metric | Description |
+|--------|-------------|
+| **Velocity** | Articles per hour covering the narrative |
+| **Source Diversity** | Number of distinct outlet types (wire, national, local, independent) |
+| **Bias Spread** | Standard deviation of outlet political bias (higher = cross-spectrum) |
+| **Frame Coherence** | Semantic similarity within the narrative cluster |
+
+### Signal Types
+
+The system generates signals when it detects noteworthy patterns:
+
+| Signal | Severity | Description |
+|--------|----------|-------------|
+| `rapid_emergence` | Medium-High | Fast initial spread of a new narrative |
+| `cross_spectrum` | Medium-High | Story crossing political boundaries |
+| `wire_cascade` | Low | Wire story triggering broad pickup |
+| `pr_amplification` | Medium-High | PR-sourced narrative gaining traction |
+| `frame_convergence` | Low | Organic convergence on similar framing |
+| `synchronized_framing` | High-Critical | Potential coordinated messaging |
+| `velocity_spike` | Medium | Sudden increase in coverage rate |
+
+## Configuration
+
+Copy `.env.example` to `.env` and customize:
+
+```bash
+# Embedding model
+EMBEDDING_MODEL=all-MiniLM-L6-v2
+
+# Clustering parameters
+HDBSCAN_MIN_CLUSTER_SIZE=3
+HDBSCAN_MIN_SAMPLES=2
+
+# Detection thresholds
+VELOCITY_EMERGING_THRESHOLD=0.5
+VELOCITY_SPREADING_THRESHOLD=2.0
+SOURCE_DIVERSITY_THRESHOLD=3
+BIAS_SPREAD_CROSS_SPECTRUM=0.7
+FRAME_COHERENCE_THRESHOLD=0.85
+
+# API settings
+API_HOST=0.0.0.0
+API_PORT=8000
 ```
 
-### Coordination Detection
-```python
-# Key metric: cluster_size / unique_authors
-# Ratio ≈ 1.0: Organic (each person posts once)
-# Ratio > 2.0: Suspicious
-# Ratio > 5.0: Likely coordinated
+## API Endpoints
+
+Start the API server:
+
+```bash
+uvicorn src.api.main:app --reload --port 8000
 ```
 
-## Validation Results
+### Key Endpoints
 
-Tested on known coordination events:
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/data/load` | Load articles from CSV |
+| `POST` | `/process/full` | Run complete pipeline |
+| `GET` | `/clusters` | List narrative clusters |
+| `GET` | `/clusters/{id}` | Get cluster details |
+| `GET` | `/signals` | List detected signals |
+| `PATCH` | `/signals/{id}/review` | Mark signal as reviewed |
+| `GET` | `/articles` | List articles |
 
-| Event | Detection Lead Time | Precision |
-|-------|-------------------|-----------|
-| GME Squeeze (Jan 2021) | 6 hours | 85% |
-| COVID Misinfo Wave | 12 hours | 78% |
-| Political Coordination | 4 hours | 82% |
+Full API documentation available at `http://localhost:8000/docs` when running.
 
-## Tech Stack
+## Technical Details
 
-- **Data**: Pandas, Pydantic, Parquet
-- **ML**: sentence-transformers, HDBSCAN, scikit-learn
-- **Vector DB**: Qdrant
-- **LLM**: OpenAI GPT-4o-mini / Claude
-- **API**: FastAPI
-- **Dashboard**: Streamlit
-- **Infrastructure**: Docker
+### Embedding Model
 
-## Learning Outcomes
+Uses [sentence-transformers](https://www.sbert.net/) with the `all-MiniLM-L6-v2` model by default:
+- 384-dimensional embeddings
+- Fast inference (~14k sentences/second on GPU)
+- Good balance of speed and quality for news text
 
-This project demonstrates:
-- Production ML pipeline design
-- Vector database integration
-- LLM application for content analysis
-- API development with FastAPI
-- Dashboard creation with Streamlit
-- Handling real-world messy data
+### Clustering Algorithm
+
+[HDBSCAN](https://hdbscan.readthedocs.io/) (Hierarchical Density-Based Spatial Clustering):
+- No need to specify number of clusters
+- Handles noise (outlier articles)
+- Finds clusters of varying densities
+
+### Pipeline Flow
+
+```
+Articles (CSV)
+     │
+     ▼
+┌─────────────┐
+│  Ingestion  │  Load & validate data
+└─────────────┘
+     │
+     ▼
+┌─────────────┐
+│  Embedding  │  Generate semantic vectors
+└─────────────┘
+     │
+     ▼
+┌─────────────┐
+│ Clustering  │  Group into narrative clusters
+└─────────────┘
+     │
+     ▼
+┌─────────────┐
+│ Detection   │  Analyze patterns, generate signals
+└─────────────┘
+     │
+     ▼
+  Signals + Clusters
+```
+
+## Roadmap
+
+- [ ] **Weak supervision**: Labeling functions for training data generation
+- [ ] **Classifier training**: Predict narrative patterns from features
+- [ ] **Drift detection**: Monitor for embedding/topic drift over time
+- [ ] **Database persistence**: SQLite/PostgreSQL for production use
+- [ ] **Historical analysis**: Compare current narratives to past patterns
+- [ ] **Entity extraction**: Track people, organizations, and claims
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues and pull requests.
 
 ## License
 
-MIT
+MIT License - see [LICENSE](LICENSE) for details.
 
 ## Acknowledgments
 
-- Pushshift for Reddit archives
-- Kaggle community for datasets
-- Sentence-Transformers team
-- Qdrant team
+- [Sentence-Transformers](https://www.sbert.net/) for embedding models
+- [HDBSCAN](https://hdbscan.readthedocs.io/) for clustering
+- [FastAPI](https://fastapi.tiangolo.com/) and [Streamlit](https://streamlit.io/) for interfaces
 
+---
 
-
+Built with ❤️ for media research
