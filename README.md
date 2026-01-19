@@ -14,7 +14,7 @@ The Emergent Narrative Detection System shifts the unit of analysis from individ
 - **PR amplification**: Corporate/institutional messaging gaining media traction
 - **Frame convergence**: Multiple outlets organically converging on similar framing
 - **Cross-spectrum spread**: Stories crossing political boundaries
-- **Synchronized messaging**: Potential coordinated framing patterns
+- **Synchronized messaging (Pink Slime)**: Potential coordinated framing patterns
 
 Rather than detecting "misinformation," this system focuses on understanding the *dynamics* of narrative emergence—how stories gain traction, which outlets pick them up, and how framing evolves over time.
 
